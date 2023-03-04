@@ -107,7 +107,13 @@ public:
 
 ### 错误方法：大数越界
 
-未考虑大数情况，在这种情况下，`temp=temp*10+ch-'0';`会发生溢出情况
+未考虑大数情况，在数字位数很长的这种情况下，`temp=temp*10+ch-'0';`会发生溢出情况
+
+例如测试用例：
+
+`word = "641770318471366266679729826266679777211350732329811266679745308703298458572010861577626667968134562136326667976028761918809582469329982666796698426667978152666797884951266679774262666797857121803678266679750689"`
+
+`m=266679793`
 
 ```cpp
 class Solution {
@@ -133,13 +139,13 @@ class Solution {
 public:
     vector<int> divisibilityArray(string word, int m) {
         vector<int> res;
-        long long temp=0;
+        long long temp=0;//因为面对 m > 2^31 / 10 这种情况时会出现越界，所以使用了long long
         for(int i=0;i<word.size();i++)
         {
             if(!i) res.push_back((temp=((word[i]-'0') % m))==0);
             else 
             {
-                if((temp=((temp*10+word[i]-'0') % m))==0) res.push_back(1);
+                if((temp=((temp*10+word[i]-'0') % m))==0) res.push_back(1);//余数 * 10 + 末尾数 再取余，类似于除法原理
                 else res.push_back(0);
             }
         }
@@ -147,6 +153,16 @@ public:
     }
 };
 ```
+
+我的解决方法：使用类似除法原理（（余数 * 10 + 末尾数）% m），但这仍然会造成大数越界的问题，必须使用 long long temp。
+
+
+
+**其实也就是如下的方法原理：**
+
+如果有 $a=k_1m+r_1$ , $b=k_2m+r_2$ ,则有：
+
+$(a+b)\  mod \ m=(r_1+r_2)\ mod \ m=(a\ mod \ m+b\ mod \ m)\ mod \ m$
 
 
 
