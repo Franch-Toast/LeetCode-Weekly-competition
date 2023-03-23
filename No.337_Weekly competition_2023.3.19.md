@@ -157,3 +157,151 @@ public:
 
 ---
 
+## Medium 2597. 美丽子集的数目 5 points
+
+给你一个由正整数组成的数组 `nums` 和一个 **正** 整数 `k` 。
+
+如果 `nums` 的子集中，任意两个整数的绝对差均不等于 `k` ，则认为该子数组是一个 **美丽** 子集。
+
+返回数组 `nums` 中 **非空** 且 **美丽** 的子集数目。
+
+`nums` 的子集定义为：可以经由 `nums` 删除某些元素（也可能不删除）得到的一个数组。只有在删除元素时选择的索引不同的情况下，两个子集才会被视作是不同的子集。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [2,4,6], k = 2
+输出：4
+解释：数组 nums 中的美丽子集有：[2], [4], [6], [2, 6] 。
+可以证明数组 [2,4,6] 中只存在 4 个美丽子集。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1], k = 1
+输出：1
+解释：数组 nums 中的美丽数组有：[1] 。
+可以证明数组 [1] 中只存在 1 个美丽子集。 
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 20`
+- `1 <= nums[i], k <= 1000`
+
+
+
+### 回溯
+
+和DP的感觉很像，注意的是在递归的过程中需要恢复现场！也可以使用哈希表来做，但是数组更快。
+
+```cpp
+class Solution {
+public:
+    int beautifulSubsets(vector<int> &nums, int k) {
+        int ans = -1; // 去掉空集
+        int cnt[3001]{}; // 用数组实现比哈希表更快
+        function<void(int)> dfs = [&](int i) {
+            if (i == nums.size()) {
+                ans++;
+                return;
+            }
+            dfs(i + 1); // 不选
+            int x = nums[i] + k; // 避免负数下标
+            if (cnt[x - k] == 0 && cnt[x + k] == 0) {
+                ++cnt[x]; // 选
+                dfs(i + 1);
+                --cnt[x]; // 恢复现场
+            }
+        };
+        dfs(0);
+        return ans;
+    }
+};
+```
+
+
+
+---
+
+## Medium 2598. 执行操作后的最大 MEX 5 points
+
+给你一个下标从 **0** 开始的整数数组 `nums` 和一个整数 `value` 。
+
+在一步操作中，你可以对 `nums` 中的任一元素加上或减去 `value` 。
+
+- 例如，如果 `nums = [1,2,3]` 且 `value = 2` ，你可以选择 `nums[0]` 减去 `value` ，得到 `nums = [-1,2,3]` 。
+
+数组的 MEX (minimum excluded) 是指其中数组中缺失的最小非负整数。
+
+- 例如，`[-1,2,3]` 的 MEX 是 `0` ，而 `[1,0,3]` 的 MEX 是 `2` 。
+
+返回在执行上述操作 **任意次** 后，`nums` 的最大 MEX *。*
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,-10,7,13,6,8], value = 5
+输出：4
+解释：执行下述操作可以得到这一结果：
+- nums[1] 加上 value 两次，nums = [1,0,7,13,6,8]
+- nums[2] 减去 value 一次，nums = [1,0,2,13,6,8]
+- nums[3] 减去 value 两次，nums = [1,0,2,3,6,8]
+nums 的 MEX 是 4 。可以证明 4 是可以取到的最大 MEX 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,-10,7,13,6,8], value = 7
+输出：2
+解释：执行下述操作可以得到这一结果：
+- nums[2] 减去 value 一次，nums = [1,-10,0,13,6,8]
+nums 的 MEX 是 2 。可以证明 2 是可以取到的最大 MEX 。
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length, value <= 105`
+- `-109 <= nums[i] <= 109`
+
+
+
+### 哈希表
+
+判断是否有数字能够通过加减 value 变为 0 ，随后再判断是否有数字能够通过加减 value 变为 1 ，随后再逐一判断过去。
+
+判断能否成功的方法：取模。值得注意的是负数取模会是负数，所以需要进行以下操作：$((m \% value) + value) \%value$
+
+再通过哈希表的方法统计。
+
+```cpp
+class Solution {
+public:
+    int findSmallestInteger(vector<int>& nums, int value) {
+        unordered_map<int,int> list;
+        for(int num:nums)
+        {
+            list[((num % value) + value) %value]++;//注意这里的取余方法
+        }
+        int mex=0;
+        while(list[mex % value]) 
+        //注意这里需要为mex % value，因为当mex >= value时，哈希表中不会存在key==mex的值了，而会继续循环 
+        {
+            list[mex % value]--;
+            mex++;
+        }
+        return mex;
+    }
+};
+```
+
